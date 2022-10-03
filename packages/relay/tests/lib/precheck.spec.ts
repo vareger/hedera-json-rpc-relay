@@ -70,7 +70,7 @@ describe('Precheck', async function() {
         mock = new MockAdapter(instance, { onNoMatch: "throwException" });
 
         // @ts-ignore
-        const mirrorNodeInstance = new MirrorNodeClient(process.env.MIRROR_NODE_URL, logger.child({ name: `mirror-node` }), registry, instance);
+        const mirrorNodeInstance = new MirrorNodeClient(process.env.MIRROR_NODE_URL, logger.child({ name: `mirror-node` }), registry, instance, process.env.API_ACCESS_TOKEN);
         sdkInstance = sinon.createStubInstance(SDKClient);
         precheck = new Precheck(mirrorNodeInstance, sdkInstance, logger, '0x12a');
     });

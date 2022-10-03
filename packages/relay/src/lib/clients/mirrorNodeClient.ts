@@ -92,21 +92,26 @@ export class MirrorNodeClient {
     private mirrorResponseHistogram;
 
     protected createAxiosClient(
-        baseUrl: string
+        baseUrl: string,
+        apiAccessToken?: string
     ): AxiosInstance {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (apiAccessToken !== null) {
+            headers['Authorization'] = apiAccessToken;
+        }
         const axiosClient: AxiosInstance = Axios.create({
             baseURL: baseUrl,
             responseType: 'json' as const,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: headers,
             timeout: 10 * 1000
         });
 
         return axiosClient;
     }
 
-    constructor(baseUrl: string, logger: Logger, register: Registry, axiosClient?: AxiosInstance) {
+    constructor(baseUrl: string, logger: Logger, register: Registry, axiosClient?: AxiosInstance, apiAccessToken?: string) {
         if (axiosClient !== undefined) {
             this.baseUrl = '';
             this.client = axiosClient;
@@ -122,7 +127,7 @@ export class MirrorNodeClient {
             baseUrl = `${baseUrl}api/v1/`;
 
             this.baseUrl = baseUrl;
-            this.client = axiosClient ? axiosClient : this.createAxiosClient(baseUrl);
+            this.client = axiosClient ? axiosClient : this.createAxiosClient(baseUrl, apiAccessToken);
         }
 
         this.logger = logger;
