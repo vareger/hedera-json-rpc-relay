@@ -18,18 +18,18 @@
  *
  */
 
-import { Eth } from '../index';
-import { ContractId, Hbar, EthereumTransaction } from '@hashgraph/sdk';
-import { BigNumber } from '@hashgraph/sdk/lib/Transfer';
-import { Logger } from 'pino';
-import { Block, Transaction, Log } from './model';
-import { MirrorNodeClient, SDKClient } from './clients';
-import { JsonRpcError, predefined } from './errors/JsonRpcError';
-import { SDKClientError } from './errors/SDKClientError';
-import { MirrorNodeClientError } from './errors/MirrorNodeClientError';
+import {Eth} from '../index';
+import {ContractId, EthereumTransaction, Hbar} from '@hashgraph/sdk';
+import {BigNumber} from '@hashgraph/sdk/lib/Transfer';
+import {Logger} from 'pino';
+import {Block, Log, Transaction} from './model';
+import {MirrorNodeClient, SDKClient} from './clients';
+import {JsonRpcError, predefined} from './errors/JsonRpcError';
+import {SDKClientError} from './errors/SDKClientError';
+import {MirrorNodeClientError} from './errors/MirrorNodeClientError';
 import constants from './constants';
-import { Precheck } from './precheck';
-import { formatRequestIdMessage } from '../formatters';
+import {Precheck} from './precheck';
+import {formatRequestIdMessage} from '../formatters';
 
 const _ = require('lodash');
 const cache = require('js-cache');
@@ -1128,6 +1128,7 @@ export class EthImpl implements Eth {
 
   async getLogs(blockHash: string | null, fromBlock: string | null, toBlock: string | null, address: string | null, topics: any[] | null, requestId?: string): Promise<Log[]> {
     const params: any = {};
+    let lastBlock;
     if (blockHash) {
       try {
         const block = await this.mirrorNodeClient.getBlock(blockHash, requestId);
@@ -1149,8 +1150,20 @@ export class EthImpl implements Eth {
       const filters = [];
       let order;
       if (toBlock) {
+        let value: string;
+        if (toBlock === "latest") {
+          const blocksResponse = await this.mirrorNodeClient.getLatestBlock(requestId);
+          const blocks = blocksResponse !== null ? blocksResponse.blocks : null;
+          if (Array.isArray(blocks) && blocks.length > 0) {
+            lastBlock =  EthImpl.numberTo0x(blocks[0]);
+          } else {
+            throw "Can't fetch latest block from the mirror node";
+          }
+        } else {
+          value = parseInt(toBlock).toString();
+        }
         // @ts-ignore
-        filters.push(`lte:${parseInt(toBlock)}`);
+        filters.push(`lte:${value}`);
         order = constants.ORDER.DESC;
       }
       if (fromBlock) {
@@ -1163,7 +1176,9 @@ export class EthImpl implements Eth {
       const blocks = blocksResult?.blocks;
       if (blocks?.length) {
         const firstBlock = (order == constants.ORDER.DESC) ? blocks[blocks.length - 1] : blocks[0];
-        const lastBlock = (order == constants.ORDER.DESC) ? blocks[0] : blocks[blocks.length - 1];
+        if (!lastBlock) {
+          lastBlock = (order == constants.ORDER.DESC) ? blocks[0] : blocks[blocks.length - 1];
+        }
         params.timestamp = [
           `gte:${firstBlock.timestamp.from}`,
           `lte:${lastBlock.timestamp.to}`

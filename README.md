@@ -114,7 +114,7 @@ The relay application currently utilizes [dotenv](https://github.com/motdotla/do
 Key values are pulled from a `.env` file and reference as `process.env.<KEY>` in the application.
 
 To modify the default values
-1. Rename [.env.example file](.env.example) to `.env`
+1. Rename [.env.example file](.env.sample) to `.env`
 2. Populate the expected fields
 3. Update the `relay` service volumes section in the [docker-compose](docker-compose.yml) file from `./.env.sample:/home/node/app/.env.sample` to `./.env:/home/node/app/.env`
 

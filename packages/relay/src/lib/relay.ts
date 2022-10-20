@@ -57,9 +57,11 @@ export class RelayImpl implements Relay {
     this.netImpl = new NetImpl(this.clientMain, chainId);
 
     const mirrorNodeClient = new MirrorNodeClient(
-      process.env.MIRROR_NODE_URL || '',
-      logger.child({ name: `mirror-node` }),
-      register
+        process.env.MIRROR_NODE_URL || '',
+        logger.child({name: `mirror-node`}),
+        register,
+        undefined,
+        process.env.API_ACCESS_TOKEN || ''
     );
 
     const sdkClient = new SDKClient(this.clientMain, logger.child({ name: `consensus-node` }), register);
