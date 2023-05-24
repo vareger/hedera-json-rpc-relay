@@ -99,7 +99,7 @@ export class MirrorNodeClient {
             'Content-Type': 'application/json'
         };
         if (apiAccessToken !== null) {
-            headers['Authorization'] = apiAccessToken;
+            headers['x-api-key'] = apiAccessToken;
         }
         const axiosClient: AxiosInstance = Axios.create({
             baseURL: baseUrl,
